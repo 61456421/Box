@@ -1,53 +1,29 @@
-name: Learn GitHub Actions
+name: Test Build
 
-run-name: ${{ github.actor }} is learning GitHub Actions
-
-on: [push]
+on:
+  workflow_dispatch:
 
 jobs:
-  check-bats-version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install BATS
-        run: npm install -g bats
-
-      - name: Check BATS version
-        run: bats -v
-
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
+      
       - name: Build With Gradle
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --build-cache --parallel --daemon --warning-mode all
-
-      - name: Prepare App
+          ./gradlew assemblerelease --build-cache --parallel --daemon --warning-mode all
+      
+      - name: Prepare APK
         run: |
           mkdir -p ${{ github.workspace }}/apk/
-          find ${{ github.workspace }} -name "*.apk" -exec mv {} ${{ github.workspace }}/apk/ \;
-
-      - name: Upload App To Artifact
+          find ${{ github.workspace }}/app/build/outputs/apk/ -name "*.apk" -exec mv {} ${{ github.workspace }}/apk/ \;
+      
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
           name: com.github.tvbox.osc
-          path: ${{ github.workspace }}/apk/*.apk
+          path: ${{ github.workspace }}/apk/*
